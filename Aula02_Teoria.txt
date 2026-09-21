@@ -1,0 +1,33 @@
+Planejamento de Sistemas de Distribuição de Energia Elétrica
+Data: 25/08
+
+ALgoritmos Metaeuriscos (problema mestre)
+
+- Problemas Escravos: Fluxo de potências -> V, I, Qij, Pij, 
+*Problema do Carteiro Viajante: otimização
+*otimização: busca do "ótimo"/ ponto de equilíbrio
+
+1,05 - 0,95
+12,66 kV
+
+FLUXO DE POTÊNCIA -> "MOTOR"
+
+Sistemas ELétricos:
+Geração -> Transmissão -> Distribuição
+
+Potencia Ativa(P) e Reativa(Q)
+S = P + jQ
+
+Subsistema Radial   
+RAdial -> rele sobrecorrente
+*what is relação X/R?
+
+             Zij = Rij + Xij
+i                 /\                j  
+°-------- R ------------ X -------|
+
+X:indutantcia l
+U = ri -> V = Z*i, onde z = r + jX
+
+Vi - Vj = Zij * Iij
+
