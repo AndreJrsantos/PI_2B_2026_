@@ -58,8 +58,8 @@ def fluxo_de_potencia(
     # kV² / MVA = ohm
     Z_base = (kV_base ** 2) / (S_base_kVA / 1000.0)
 
-    # kVA / kV = A   (corrente base, com raiz de 3 do sistema trifásico)
-    I_base_A = S_base_kVA / (math.sqrt(3) * kV_base)
+    # kVA / kV = A   (corrente base do sistema monofásico)
+    I_base_A = S_base_kVA / ( kV_base)
 
 
     # --------------------------------------------------------
