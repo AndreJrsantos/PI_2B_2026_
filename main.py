@@ -1,9 +1,14 @@
+import os
 import sys
 
 from ler_dados import ler_arquivo, imprimir_dados
 from ordena import ordenar_linhas, imprimir_linhas_ordenadas
 from fluxo_de_potencia import fluxo_de_potencia, imprimir_resultados
-from imunologico import pedir_dados_usuario, otimizar, gerar_txt
+from otimiza_minisubs import (
+    pedir_parametros,
+    otimizar_minisubestacoes,
+    imprimir_otimizacao,
+)
 
 
 # ============================================================
@@ -12,83 +17,64 @@ from imunologico import pedir_dados_usuario, otimizar, gerar_txt
 
 if __name__ == "__main__":
 
+    S_BASE_KVA = 10000.0
+
     # --------------------------------------------------------
-    # 1. Definir o caminho do arquivo
+    # 1. Caminho do arquivo (argumento > pasta do script > Downloads)
     # --------------------------------------------------------
- 
+
     if len(sys.argv) > 1:
-
         caminho_arquivo = sys.argv[1]
-
     else:
+        local = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                             "069BusSystem.txt")
+        caminho_arquivo = local if os.path.exists(local) else \
+            r"C:\Users\55149\Downloads\069BusSystem.txt"
 
-        caminho_arquivo = r"C:\Users\augus\Downloads\069BusSystem.txt"
     # --------------------------------------------------------
-    # 2. Ler o arquivo
+    # 2. Leitura e ordenação da rede
     # --------------------------------------------------------
 
     dados = ler_arquivo(caminho_arquivo)
-
-    # --------------------------------------------------------
-    # 3. Imprimir os dados originais
-    # --------------------------------------------------------
-
     imprimir_dados(dados)
 
-    # --------------------------------------------------------
-    # 4. Ordenar as linhas
-    # --------------------------------------------------------
-
     Ni_ordenado, Nj_ordenado, id_ordenado = ordenar_linhas(dados)
+    imprimir_linhas_ordenadas(Ni_ordenado, Nj_ordenado, id_ordenado)
 
     # --------------------------------------------------------
-    # 5. Imprimir as linhas ordenadas
-    # --------------------------------------------------------
-
-    imprimir_linhas_ordenadas(
-        Ni_ordenado,
-        Nj_ordenado,
-        id_ordenado
-    )
-
-    # --------------------------------------------------------
-    # 6. Fluxo de potência (backward / forward)
+    # 3. Fluxo de potência do caso base (sem minisubestações)
     # --------------------------------------------------------
 
     resultado = fluxo_de_potencia(
-        dados,
-        Ni_ordenado,
-        Nj_ordenado,
-        id_ordenado,
-        S_base_kVA=10000.0,   # base de potência (kVA)
-        tol=1e-5              # critério de convergência (pu)
+        dados, Ni_ordenado, Nj_ordenado, id_ordenado,
+        S_base_kVA=S_BASE_KVA, tol=1e-5,
     )
-
-    # --------------------------------------------------------
-    # 7. Imprimir os resultados do fluxo de potência
-    # --------------------------------------------------------
-
+    print("\n##### CASO BASE (SEM MINISUBESTAÇÕES) #####")
     imprimir_resultados(resultado)
 
     # --------------------------------------------------------
-    # 8. Alocação de subestações (algoritmo imunológico)
+    # 4. Dados digitados pelo usuário
     # --------------------------------------------------------
 
-    resp = input("\nDeseja otimizar a localização de novas subestações? (s/n): ").strip().lower()
+    n, preco_inst, p_kw, q_kvar, preco_kw = pedir_parametros()
 
-    if resp == "s":
+    # --------------------------------------------------------
+    # 5. Otimização (Simulated Annealing)
+    # --------------------------------------------------------
 
-        # usuário digita: nº de subestações, preço, P, Q e custo por kW perdido
-        subestacoes, custo_perda = pedir_dados_usuario()
+    print("\nOtimizando, aguarde...")
 
-        saida = otimizar(dados, subestacoes, custo_perda)
+    otim = otimizar_minisubestacoes(
+        dados, Ni_ordenado, Nj_ordenado, id_ordenado,
+        n, preco_inst, p_kw, q_kvar, preco_kw,
+        S_base=S_BASE_KVA,
+    )
 
-        arquivo = gerar_txt(saida, "resultado_subestacoes.txt")
+    # --------------------------------------------------------
+    # 6. Resultado: ONDE instalar + fluxo de potência final
+    # --------------------------------------------------------
 
-        # fluxo de potência da solução encontrada (com as subestações instaladas)
-        print("\n>>> FLUXO DE POTÊNCIA COM AS SUBESTAÇÕES INSTALADAS EM:", saida["melhor_ab"])
-        imprimir_resultados(saida["melhor_r"]["res"])
+    imprimir_otimizacao(otim)
 
-        print("\nMelhor solução (barra de cada subestação):", saida["melhor_ab"])
-        print(f"Custo total: {saida['melhor_r']['custo']:,.2f}")
-        print(f"Arquivo gerado: {arquivo}")
+    print("\n##### FLUXO DE POTÊNCIA COM AS MINISUBESTAÇÕES #####")
+    imprimir_resultados(otim["res"])
