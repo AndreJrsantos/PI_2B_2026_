@@ -44,9 +44,7 @@ def fluxo_de_potencia(
     V_SE_pu      : tensão da subestação em pu (módulo, ângulo 0)
     tol          : tolerância do erro de potência (pu)
     max_iter     : número máximo de iterações
-    injecoes     : dict {id_barra: complex(kW, kvar)} com potência INJETADA
-                   por novas subestações (None = nenhuma). Entra como
-                   carga negativa na barra.
+    injecoes     : {barra: complex(kW, kvar)} potência INJETADA (minisubestações)
 
     Retorna
     -------
@@ -62,8 +60,8 @@ def fluxo_de_potencia(
     # kV² / MVA = ohm
     Z_base = (kV_base ** 2) / (S_base_kVA / 1000.0)
 
-    # kVA / kV = A   (corrente base do sistema monofásico)
-    I_base_A = S_base_kVA / ( kV_base)
+    # kVA / kV = A   (corrente base, com raiz de 3 do sistema trifásico)
+    I_base_A = S_base_kVA / (math.sqrt(3) * kV_base)
 
 
     # --------------------------------------------------------
@@ -87,11 +85,10 @@ def fluxo_de_potencia(
     # A SE é a barra de referência (slack): não tem carga no cálculo
     S[SE] = 0j
 
-    # Novas subestações: injeção de potência = carga negativa
+    # Minisubestações: geração local abate a carga líquida da barra
     if injecoes:
-        for barra_inj, s_inj in injecoes.items():
-            if barra_inj != SE:
-                S[barra_inj] -= s_inj / S_base_kVA
+        for b, s_inj in injecoes.items():
+            S[b] -= s_inj / S_base_kVA
 
 
     # --------------------------------------------------------
@@ -312,3 +309,4 @@ def imprimir_resultados(res):
     print("=" * 60)
     print(f"Potência da SE : {res['S_SE_kW']:.3f} kW + j{res['S_SE_kvar']:.3f} kvar")
     print(f"Perdas totais  : {res['perdas_kW']:.3f} kW + j{res['perdas_kvar']:.3f} kvar")
+    
