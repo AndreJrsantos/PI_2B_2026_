@@ -1,4 +1,28 @@
+import os
 import sys
+
+
+def pasta_do_projeto():
+    """Pasta onde está este script (ou a pasta atual, se __file__ não existir)."""
+    try:
+        return os.path.dirname(os.path.abspath(__file__))
+    except NameError:
+        return os.getcwd()
+
+
+def resolver_caminho(nome):
+    """
+    Aceita só o NOME do arquivo (ex.: '069BusSystem.txt') ou um caminho completo.
+    Procura primeiro como informado, depois na pasta do projeto e na pasta atual.
+    """
+    candidatos = [nome,
+                  os.path.join(pasta_do_projeto(), nome),
+                  os.path.join(os.getcwd(), nome)]
+    for c in candidatos:
+        if os.path.isfile(c):
+            return c
+    raise FileNotFoundError(
+        f"Arquivo '{nome}' não encontrado. Procurei em:\n  " + "\n  ".join(candidatos))
 
 
 def ler_arquivo(caminho):
@@ -107,11 +131,7 @@ def imprimir_dados(dados):
 
 
 if __name__ == "__main__":
-    if len(sys.argv) > 1:
-        caminho_arquivo = sys.argv[1]
-    else:
-      caminho_arquivo = r"C:\Users\55149\Downloads\069BusSystem.txt"
-
-    dados = ler_arquivo(caminho_arquivo)
+    nome = sys.argv[1] if len(sys.argv) > 1 else "069BusSystem.txt"
+    dados = ler_arquivo(resolver_caminho(nome))
     imprimir_dados(dados)
 

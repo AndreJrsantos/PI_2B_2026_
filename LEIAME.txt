@@ -1,0 +1,16 @@
+PROJETO - FLUXO DE POTENCIA + ALOCACAO DE SUBESTACOES (ALGORITMO IMUNOLOGICO)
+
+Arquivos:
+  main.py               programa principal (fluxo de potencia + otimizacao)
+  ler_dados.py          leitura do arquivo da rede
+  ordena.py             ordenacao das linhas a partir da SE
+  fluxo_de_potencia.py  fluxo backward/forward (aceita injecoes das subestacoes)
+  imunologico.py        algoritmo imunologico (CLONALG)
+  069BusSystem.txt      dados do sistema de 69 barras
+
+Como rodar (dentro desta pasta):
+  python main.py 069BusSystem.txt
+  -> responda "s" para otimizar e digite: numero de subestacoes,
+     preco, P (kW) e Q (kvar) de cada uma e o custo por kW perdido.
+
+Saida: resultado_subestacoes.txt (barras onde instalar cada subestacao).
